@@ -49,6 +49,9 @@ void renderCharacter() {
 };
 
 bool isPath() {
+	if(character.X <= 0 || character.X >= sizeX || character.Y <= 0 || character.Y >= sizeY) {
+		return false;
+	};
 	short tile = scene[character.X][character.Y];
 	if(tile == PATH) return true;
 	return false;
@@ -60,12 +63,12 @@ void undoCurrentMove() {
 };
 
 void left() {
-	character.X -= 1;
+	character.X -= 2;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
 void right() {
-	character.X += 1;
+	character.X += 2;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
