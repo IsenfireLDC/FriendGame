@@ -32,24 +32,16 @@ using namespace std;
 #define M_WALL "#"
 #define M_PATH " "
 #define M_CHARACTER "&"
-#define M_FRIEND "8"
+#define M_COMPANION "8"
 #define M_ENEMY "~"
 
 
 const int sizeX = 51;
 const int sizeY = 21;
 
-//COORD characterPrev = {1, 1};
-//COORD character = {1, 1};
-
 struct entity {
 	COORD curr;
 	COORD prev;
-};
-
-entity character = {
-		{1, 1},
-		{1, 1}
 };
 
 /*
@@ -57,6 +49,10 @@ entity afriend;
 
 entity enemies[4];
 */
+
+COORD character_origin = {1, 1};
+
+entity* character = new entity;
 
 short scene[sizeX][sizeY];
 /*
@@ -66,46 +62,51 @@ void debug(char* a) {
 };
 */
 
-void renderCharacter() {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
-	cout << " ";
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.curr);
-	cout << M_CHARACTER;
-	character.prev = character.curr;
+void initCharacter() {
+	character->curr = {1, 1};
+	character->prev = {1, 1};
 };
 
-bool isPath(entity a) {
-	if(a.curr.X <= 0 || a.curr.X >= sizeX || a.curr.Y <= 0 || a.curr.Y >= sizeY) {
+void renderCharacter() {
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character->prev);
+	cout << " ";
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character->curr);
+	cout << M_CHARACTER;
+	character->prev = character->curr;
+};
+
+bool isPath(entity* ent) {
+	if(ent->curr.X <= 0 || ent->curr.X >= sizeX || ent->curr.Y <= 0 || ent->curr.Y >= sizeY) {
 		return false;
 	};
-	short tile = scene[a.curr.X][a.curr.Y];
+	short tile = scene[ent->curr.X][ent->curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
 
-void undoCurrentMove(entity a) {
-	a.curr.X = a.prev.X;
-	a.curr.Y = a.prev.Y;
+void undoCurrentMove(entity *ent) {
+	ent->curr.X = ent->prev.X;
+	ent->curr.Y = ent->prev.Y;
 };
 
-void left(entity a) {
-	a.curr.X -= 2;
-	if(!isPath(a)) undoCurrentMove(a);
+void left(entity* ent) {
+	ent->curr.X -= 2;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void right(entity a) {
-	a.curr.X += 2;
-	if(!isPath(a)) undoCurrentMove(a);
+void right(entity* ent) {
+	ent->curr.X += 2;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void up(entity a) {
-	a.curr.Y -= 1;
-	if(!isPath(a)) undoCurrentMove(a);
+void up(entity* ent) {
+	ent->curr.Y -= 1;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void down(entity a) {
-	a.curr.Y += 1;
-	if(!isPath(a)) undoCurrentMove(a);
+void down(entity* ent) {
+	ent->curr.Y += 1;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
 
@@ -113,7 +114,7 @@ int run()
 {
    int KB_code=0;
 
-   while(KB_code != KB_ESCAPE )
+   while(KB_code != KB_ESCAPE)
    {
      if (kbhit())
       {
@@ -146,8 +147,6 @@ int run()
                 	right(character);
                 	break;
             }
-        	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
-        	cout << character.curr.X << " " << character.curr.Y << endl;
 
       }
   }
@@ -214,6 +213,7 @@ void testRender() {
 void start() {
 	generate();
 	renderScene();
+	initCharacter();
 	//testRender();
 	renderCharacter();
 	run();
