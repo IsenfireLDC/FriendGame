@@ -68,35 +68,29 @@ bool isPath(entity ent) {
 	return false;
 };
 
-void undoCurrentMove(entity ent) {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
-	cout << "        " << endl << "        " << endl << "        " << endl << "        ";
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
-	cout << "(" << ent.curr.X << ", " << ent.curr.Y << ")" << endl << "(" << ent.prev.X << ", " << ent.prev.Y << ")" << endl;
-	cout << "(" << character.curr.X << ", " << character.curr.Y << ")" << endl << "(" << character.prev.X << ", " << character.prev.Y << ")";
-
-	ent.curr.X = ent.prev.X;
-	ent.curr.Y = ent.prev.Y;
+void undoCurrentMove(entity *ent) {
+	ent->curr.X = ent->prev.X;
+	ent->curr.Y = ent->prev.Y;
 };
 
 void left() {
 	character.curr.X -= 2;
-	if(!isPath(character)) undoCurrentMove(character);
+	if(!isPath(character)) undoCurrentMove(&character);
 	renderCharacter();
 };
 void right() {
 	character.curr.X += 2;
-	if(!isPath(character)) undoCurrentMove(character);
+	if(!isPath(character)) undoCurrentMove(&character);
 	renderCharacter();
 };
 void up() {
 	character.curr.Y -= 1;
-	if(!isPath(character)) undoCurrentMove(character);
+	if(!isPath(character)) undoCurrentMove(&character);
 	renderCharacter();
 };
 void down() {
 	character.curr.Y += 1;
-	if(!isPath(character)) undoCurrentMove(character);
+	if(!isPath(character)) undoCurrentMove(&character);
 	renderCharacter();
 };
 
