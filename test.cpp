@@ -42,28 +42,28 @@ struct entity {
 
 COORD character_origin = {1, 1};
 
-entity character;
+entity* character = new entity;
 
 short scene[sizeX][sizeY];
 
 void initCharacter() {
-	character.curr = {1, 1};
-	character.prev = {1, 1};
+	character->curr = {1, 1};
+	character->prev = {1, 1};
 };
 
 void renderCharacter() {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character->prev);
 	cout << " ";
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.curr);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character->curr);
 	cout << M_CHARACTER;
-	character.prev = character.curr;
+	character->prev = character->curr;
 };
 
-bool isPath(entity ent) {
-	if(ent.curr.X <= 0 || ent.curr.X >= sizeX || ent.curr.Y <= 0 || ent.curr.Y >= sizeY) {
+bool isPath(entity* ent) {
+	if(ent->curr.X <= 0 || ent->curr.X >= sizeX || ent->curr.Y <= 0 || ent->curr.Y >= sizeY) {
 		return false;
 	};
-	short tile = scene[ent.curr.X][ent.curr.Y];
+	short tile = scene[ent->curr.X][ent->curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
@@ -73,24 +73,24 @@ void undoCurrentMove(entity *ent) {
 	ent->curr.Y = ent->prev.Y;
 };
 
-void left() {
-	character.curr.X -= 2;
-	if(!isPath(character)) undoCurrentMove(&character);
+void left(entity* ent) {
+	ent->curr.X -= 2;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void right() {
-	character.curr.X += 2;
-	if(!isPath(character)) undoCurrentMove(&character);
+void right(entity* ent) {
+	ent->curr.X += 2;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void up() {
-	character.curr.Y -= 1;
-	if(!isPath(character)) undoCurrentMove(&character);
+void up(entity* ent) {
+	ent->curr.Y -= 1;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
-void down() {
-	character.curr.Y += 1;
-	if(!isPath(character)) undoCurrentMove(&character);
+void down(entity* ent) {
+	ent->curr.Y += 1;
+	if(!isPath(ent)) undoCurrentMove(ent);
 	renderCharacter();
 };
 
@@ -107,28 +107,28 @@ int run()
             switch (KB_code)
             {
                 case KB_LEFT:
-                	left();
+                	left(character);
                 	break;
                 case KB_RIGHT:
-                	right();
+                	right(character);
                 	break;
                 case KB_UP:
-                	up();
+                	up(character);
                 	break;
                 case KB_DOWN:
-                	down();
+                	down(character);
                 	break;
                 case KB_W: //W
-                	up();
+                	up(character);
                 	break;
                 case KB_A: //A
-                	left();
+                	left(character);
                 	break;
                 case KB_S: //S
-                	down();
+                	down(character);
                 	break;
                 case KB_D:
-                	right();
+                	right(character);
                 	break;
             }
 
