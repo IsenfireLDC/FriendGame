@@ -9,6 +9,8 @@
 #include <iostream>
 #include <conio.h>
 #include <random>
+#include <fstream>
+#include <bitset>
 
 using namespace std;
 
@@ -30,53 +32,65 @@ using namespace std;
 #define M_WALL "#"
 #define M_PATH " "
 #define M_CHARACTER "&"
+#define M_FRIEND "8"
+#define M_ENEMY "~"
 
 
 const int sizeX = 51;
 const int sizeY = 21;
 
-COORD characterPrev = {1, 1};
-COORD character = {1, 1};
+//COORD characterPrev = {1, 1};
+//COORD character = {1, 1};
+
+struct entity {
+	COORD curr;
+	COORD prev;
+};
+
+entity character = {
+		{1, 1},
+		{1, 1}
+};
 
 short scene[sizeX][sizeY];
 
 void renderCharacter() {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), characterPrev);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
 	cout << " ";
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.curr);
 	cout << M_CHARACTER;
-	characterPrev = character;
+	character.prev = character.curr;
 };
 
-bool isPath() {
-	short tile = scene[character.X][character.Y];
+bool isPath(entity a) {
+	short tile = scene[a.curr.X][a.curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
 
-void undoCurrentMove() {
-	character.X = characterPrev.X;
-	character.Y = characterPrev.Y;
+void undoCurrentMove(entity a) {
+	a.curr.X = a.prev.X;
+	a.curr.Y = a.prev.Y;
 };
 
-void left() {
-	character.X -= 1;
-	if(!isPath()) undoCurrentMove();
+void left(entity a) {
+	a.curr.X -= 1;
+	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
-void right() {
-	character.X += 1;
-	if(!isPath()) undoCurrentMove();
+void right(entity a) {
+	a.curr.X += 1;
+	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
-void up() {
-	character.Y -= 1;
-	if(!isPath()) undoCurrentMove();
+void up(entity a) {
+	a.curr.Y -= 1;
+	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
-void down() {
-	character.Y += 1;
-	if(!isPath()) undoCurrentMove();
+void down(entity a) {
+	a.curr.Y += 1;
+	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
 
@@ -93,28 +107,28 @@ int run()
             switch (KB_code)
             {
                 case KB_LEFT:
-                	left();
+                	left(character);
                 	break;
                 case KB_RIGHT:
-                	right();
+                	right(character);
                 	break;
                 case KB_UP:
-                	up();
+                	up(character);
                 	break;
                 case KB_DOWN:
-                	down();
+                	down(character);
                 	break;
                 case KB_W: //W
-                	up();
+                	up(character);
                 	break;
                 case KB_A: //A
-                	left();
+                	left(character);
                 	break;
                 case KB_S: //S
-                	down();
+                	down(character);
                 	break;
                 case KB_D:
-                	right();
+                	right(character);
                 	break;
             }
 
@@ -130,7 +144,7 @@ void generateOuterWall() {
 			if(i == 0 || i == (short)sizeX - 1 || j == 0 || j == (short)sizeY - 1)
 				scene[(int)i][(int)j] = WALL;
 			else
-				scene[(int)i][(int)j] = UNMADE;
+				scene[(int)i][(int)j] = PATH;
 };
 
 void generateFloor() {
@@ -142,7 +156,7 @@ void generateFloor() {
 	};
 	default_random_engine gen;
 	uniform_real_distribution<float> dist(0, 1);
-	COORD c = character;
+	COORD c = character.curr;
 	COORD n = c;
 	bool done = false;
 	vector<COORD> next;
@@ -187,7 +201,7 @@ void testRender() {
 				SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {i, j});
 				cout << M_UNMADE;
 			}
-}
+};
 
 void start() {
 	generate();
@@ -195,11 +209,65 @@ void start() {
 	//testRender();
 	renderCharacter();
 	run();
+};
+
+int width = 0, height = 0;
+
+unsigned char* readBMP(char* filename)
+{
+    int i;
+    FILE* f = fopen(filename, "rb");
+    unsigned char info[54];
+    fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
+
+    // extract image height and width from header
+    width = *(int*)&info[18];
+    height = *(int*)&info[22];
+
+    int size = 1 * width * height;
+    unsigned char* data = new unsigned char[size]; // allocate 3 bytes per pixel
+    fread(data, sizeof(unsigned char), size, f); // read the rest of the data at once
+    fclose(f);
+
+    for(i = 0; i < size; i += 3)
+    {
+            unsigned char tmp = data[i];
+            data[i] = data[i+2];
+            data[i+2] = tmp;
+    }
+
+    return data;
 }
+
+void read2() {
+	FILE* f = fopen(".\\Maps\\test2.bmp", "rb");
+
+	unsigned char info[54];
+	fread(info, sizeof(unsigned char), 54, f);
+
+	width = (int)info[18];
+	height = (int)info[22];
+
+	int size = width * height;
+	unsigned char data[size];
+	fread(data, sizeof(unsigned char), size, f);
+	fclose(f);
+
+	cout << width << endl;
+	cout << height << endl;
+	for (int i = 0; i < width; i++) {
+		for(int j = 0; j < height; j++) {
+			cout << bitset<8>(data[i]);
+		}
+		cout << endl;
+	}
+
+};
 
 int main() {
 	system("cls");
 	start();
+	//read2();
 
 	return 0;
 };
