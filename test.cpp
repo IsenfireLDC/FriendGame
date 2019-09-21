@@ -67,7 +67,10 @@ void renderCharacter() {
 };
 
 bool isPath(entity a) {
-	if(a.curr.X >= sizeX || a.curr.Y >= sizeY) return false;
+	if(a.curr.X >= sizeX || a.curr.Y >= sizeY) {
+		cout << a.curr.X << " " << a.curr.Y << endl;
+		return false;
+	}
 	short tile = scene[a.curr.X][a.curr.Y];
 	if(tile == PATH) return true;
 	return false;
@@ -109,6 +112,9 @@ int run()
       {
             KB_code = getch();
 
+            SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+            cout << KB_code;
+
             switch (KB_code)
             {
                 case KB_LEFT:
@@ -123,13 +129,13 @@ int run()
                 case KB_DOWN:
                 	down(character);
                 	break;
-                case KB_W: //W
+                case KB_W:
                 	up(character);
                 	break;
-                case KB_A: //A
+                case KB_A:
                 	left(character);
                 	break;
-                case KB_S: //S
+                case KB_S:
                 	down(character);
                 	break;
                 case KB_D:
@@ -152,6 +158,7 @@ void generateOuterWall() {
 				scene[(int)i][(int)j] = PATH;
 };
 
+/*
 void generateCreatures(int nenemies) {
 	default_random_engine gen;
 	uniform_int_distribution<short> distX(0, sizeX/2);
@@ -164,6 +171,7 @@ void generateCreatures(int nenemies) {
 		enemies[i] = b;
 	}
 };
+*/
 
 void generate() {
 	generateOuterWall();
