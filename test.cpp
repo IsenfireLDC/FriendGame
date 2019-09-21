@@ -52,16 +52,19 @@ entity character = {
 		{1, 1}
 };
 
+/*
 entity afriend;
 
 entity enemies[4];
+*/
 
 short scene[sizeX][sizeY];
-
+/*
 void debug(char* a) {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
 	cout << a;
 };
+*/
 
 void renderCharacter() {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
@@ -143,6 +146,8 @@ int run()
                 	right(character);
                 	break;
             }
+        	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+        	cout << character.curr.X << " " << character.curr.Y << endl;
 
       }
   }
