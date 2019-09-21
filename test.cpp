@@ -8,6 +8,7 @@
 #include <windows.h>
 #include <iostream>
 #include <conio.h>
+#include <random>
 
 using namespace std;
 
@@ -21,14 +22,18 @@ using namespace std;
 #define KB_S 115
 #define KB_D 100
 
+#define UNMADE -1
 #define PATH 0
 #define WALL 1
 
+#define M_UNMADE "!"
 #define M_WALL "#"
+#define M_PATH " "
 #define M_CHARACTER "&"
 
-const int sizeX = 50;
-const int sizeY = 20;
+
+const int sizeX = 51;
+const int sizeY = 21;
 
 COORD characterPrev = {1, 1};
 COORD character = {1, 1};
@@ -75,7 +80,7 @@ void down() {
 	renderCharacter();
 };
 
-int input()
+int run()
 {
    int KB_code=0;
 
@@ -117,16 +122,43 @@ int input()
   }
 
   return 0;
-}
+};
 
-void generate() {
-	for (short i = 0; i < (short)sizeX; i++) {
-		for(short j = 0; j < (short)sizeY; j++) {
-			if(i == 0 || i == 49 || j == 0 || j == 19) {
+void generateOuterWall() {
+	for (short i = 0; i < (short)sizeX; i++)
+		for(short j = 0; j < (short)sizeY; j++)
+			if(i == 0 || i == (short)sizeX - 1 || j == 0 || j == (short)sizeY - 1)
 				scene[(int)i][(int)j] = WALL;
-			};
+			else
+				scene[(int)i][(int)j] = UNMADE;
+};
+
+void generateFloor() {
+	short nextPts[4][2] = {
+			{0, 2},
+			{0, -2},
+			{2, 0},
+			{-2, 0}
+	};
+	default_random_engine gen;
+	uniform_real_distribution<float> dist(0, 1);
+	COORD c = character;
+	COORD n = c;
+	bool done = false;
+	vector<COORD> next;
+	while (!done) {
+		for(int i = 0; i < 4; i++) {
+			short pt[2] = {nextPts[i][0], nextPts[i][1]};
+			if(!((c.Y+pt[1] > sizeY) || (c.X+pt[0] > sizeX)) && scene[c.X+pt[0]][c.Y+pt[1]] == UNMADE) {
+				n = {c.X+pt[0], c.Y+pt[1]};
+				next.push_back(n);
+			}
 		}
 	}
+};
+
+void generate() {
+	generateOuterWall();
 };
 
 void renderScene() {
@@ -136,19 +168,38 @@ void renderScene() {
 			switch(scene[(int)i][(int)j]) {
 			case WALL:
 				cout << M_WALL;
-				SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
-				cout << "WALL";
+				break;
+			case UNMADE:
+				cout << M_UNMADE;
+				break;
+			case PATH:
+				cout << M_PATH;
 				break;
 			}
 		}
 	}
 };
 
-int main() {
-	//printf("\033c");
-	system("cls");
+void testRender() {
+	for(short i = 0; i < (short)sizeX; i++)
+		for(short j = 0; j < (short)sizeY; j++)
+			if(i % 2 == 0 && j % 2 == 0) {
+				SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {i, j});
+				cout << M_UNMADE;
+			}
+}
+
+void start() {
+	generate();
+	renderScene();
+	//testRender();
 	renderCharacter();
-	input();
+	run();
+}
+
+int main() {
+	system("cls");
+	start();
 
 	return 0;
 };
