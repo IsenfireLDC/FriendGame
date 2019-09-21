@@ -211,59 +211,6 @@ void start() {
 	run();
 };
 
-int width = 0, height = 0;
-
-unsigned char* readBMP(char* filename)
-{
-    int i;
-    FILE* f = fopen(filename, "rb");
-    unsigned char info[54];
-    fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
-
-    // extract image height and width from header
-    width = *(int*)&info[18];
-    height = *(int*)&info[22];
-
-    int size = 1 * width * height;
-    unsigned char* data = new unsigned char[size]; // allocate 3 bytes per pixel
-    fread(data, sizeof(unsigned char), size, f); // read the rest of the data at once
-    fclose(f);
-
-    for(i = 0; i < size; i += 3)
-    {
-            unsigned char tmp = data[i];
-            data[i] = data[i+2];
-            data[i+2] = tmp;
-    }
-
-    return data;
-}
-
-void read2() {
-	FILE* f = fopen(".\\Maps\\test2.bmp", "rb");
-
-	unsigned char info[54];
-	fread(info, sizeof(unsigned char), 54, f);
-
-	width = (int)info[18];
-	height = (int)info[22];
-
-	int size = width * height;
-	unsigned char data[size];
-	fread(data, sizeof(unsigned char), size, f);
-	fclose(f);
-
-	cout << width << endl;
-	cout << height << endl;
-	for (int i = 0; i < width; i++) {
-		for(int j = 0; j < height; j++) {
-			cout << bitset<8>(data[i]);
-		}
-		cout << endl;
-	}
-
-};
-
 int main() {
 	system("cls");
 	start();
