@@ -130,7 +130,7 @@ void generateOuterWall() {
 			if(i == 0 || i == (short)sizeX - 1 || j == 0 || j == (short)sizeY - 1)
 				scene[(int)i][(int)j] = WALL;
 			else
-				scene[(int)i][(int)j] = UNMADE;
+				scene[(int)i][(int)j] = PATH;
 };
 
 void generateFloor() {
