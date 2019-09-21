@@ -24,24 +24,27 @@ using namespace std;
 #define PATH 0
 #define WALL 1
 
+#define M_WALL "#"
+#define M_CHARACTER "&"
+
 const int sizeX = 50;
 const int sizeY = 20;
 
 COORD characterPrev = {1, 1};
 COORD character = {1, 1};
 
-short walls[sizeX][sizeY];
+short scene[sizeX][sizeY];
 
 void renderCharacter() {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), characterPrev);
 	cout << " ";
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character);
-	cout << "&";
+	cout << M_CHARACTER;
 	characterPrev = character;
 };
 
 bool isPath() {
-	short tile = walls[character.X][character.Y];
+	short tile = scene[character.X][character.Y];
 	if(tile == PATH) return true;
 	return false;
 };
@@ -116,20 +119,34 @@ int input()
   return 0;
 }
 
+void generate() {
+	for (short i = 0; i < (short)sizeX; i++) {
+		for(short j = 0; j < (short)sizeY; j++) {
+			if(i == 0 || i == 49 || j == 0 || j == 19) {
+				scene[(int)i][(int)j] = WALL;
+			};
+		}
+	}
+};
+
+void renderScene() {
+	for(short i = 0; i < (short)sizeX; i++) {
+		for(short j = 0; j < (short)sizeY; j++) {
+			SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {i, j});
+			switch(scene[(int)i][(int)j]) {
+			case WALL:
+				cout << M_WALL;
+				SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+				cout << "WALL";
+				break;
+			}
+		}
+	}
+};
+
 int main() {
 	//printf("\033c");
 	system("cls");
-	COORD c = { 22, 22 };
-	for (short i = 0; i < 50; i++) {
-		for(short j = 0; j < 20; j++) {
-			if(i == 0 || i == 49 || j == 0 || j == 19) {
-				c = {i, j};
-				walls[i][j] = WALL;
-			};
-			SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), c);
-			cout << "#";
-		}
-	}
 	renderCharacter();
 	input();
 
