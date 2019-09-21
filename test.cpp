@@ -30,6 +30,7 @@ using namespace std;
 #define M_WALL "#"
 #define M_PATH " "
 #define M_CHARACTER "&"
+#define M_COMPANION "8"
 
 
 const int sizeX = 51;
