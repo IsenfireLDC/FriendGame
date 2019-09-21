@@ -47,8 +47,8 @@ entity character;
 short scene[sizeX][sizeY];
 
 void initCharacter() {
-	character.curr = character_origin;
-	character.prev = character_origin;
+	character.curr = {1, 1};
+	character.prev = {1, 1};
 };
 
 void renderCharacter() {
@@ -59,38 +59,44 @@ void renderCharacter() {
 	character.prev = character.curr;
 };
 
-bool isPath() {
-	if(character.curr.X <= 0 || character.curr.X >= sizeX || character.curr.Y <= 0 || character.curr.Y >= sizeY) {
+bool isPath(entity ent) {
+	if(ent.curr.X <= 0 || ent.curr.X >= sizeX || ent.curr.Y <= 0 || ent.curr.Y >= sizeY) {
 		return false;
 	};
-	short tile = scene[character.curr.X][character.curr.Y];
+	short tile = scene[ent.curr.X][ent.curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
 
-void undoCurrentMove() {
-	character.curr.X = character.prev.X;
-	character.curr.Y = character.prev.Y;
+void undoCurrentMove(entity ent) {
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+	cout << "        " << endl << "        " << endl << "        " << endl << "        ";
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+	cout << "(" << ent.curr.X << ", " << ent.curr.Y << ")" << endl << "(" << ent.prev.X << ", " << ent.prev.Y << ")" << endl;
+	cout << "(" << character.curr.X << ", " << character.curr.Y << ")" << endl << "(" << character.prev.X << ", " << character.prev.Y << ")";
+
+	ent.curr.X = ent.prev.X;
+	ent.curr.Y = ent.prev.Y;
 };
 
 void left() {
 	character.curr.X -= 2;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove(character);
 	renderCharacter();
 };
 void right() {
 	character.curr.X += 2;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove(character);
 	renderCharacter();
 };
 void up() {
 	character.curr.Y -= 1;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove(character);
 	renderCharacter();
 };
 void down() {
 	character.curr.Y += 1;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove(character);
 	renderCharacter();
 };
 
