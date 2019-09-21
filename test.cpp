@@ -52,6 +52,10 @@ entity character = {
 		{1, 1}
 };
 
+entity afriend;
+
+entity enemies[4];
+
 short scene[sizeX][sizeY];
 
 void renderCharacter() {
@@ -63,6 +67,7 @@ void renderCharacter() {
 };
 
 bool isPath(entity a) {
+	if(a.curr.X >= sizeX || a.curr.Y >= sizeY) return false;
 	short tile = scene[a.curr.X][a.curr.Y];
 	if(tile == PATH) return true;
 	return false;
@@ -74,12 +79,12 @@ void undoCurrentMove(entity a) {
 };
 
 void left(entity a) {
-	a.curr.X -= 1;
+	a.curr.X -= 2;
 	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
 void right(entity a) {
-	a.curr.X += 1;
+	a.curr.X += 2;
 	if(!isPath(a)) undoCurrentMove(a);
 	renderCharacter();
 };
@@ -147,27 +152,16 @@ void generateOuterWall() {
 				scene[(int)i][(int)j] = PATH;
 };
 
-void generateFloor() {
-	short nextPts[4][2] = {
-			{0, 2},
-			{0, -2},
-			{2, 0},
-			{-2, 0}
-	};
+void generateCreatures(int nenemies) {
 	default_random_engine gen;
-	uniform_real_distribution<float> dist(0, 1);
-	COORD c = character.curr;
-	COORD n = c;
-	bool done = false;
-	vector<COORD> next;
-	while (!done) {
-		for(int i = 0; i < 4; i++) {
-			short pt[2] = {nextPts[i][0], nextPts[i][1]};
-			if(!((c.Y+pt[1] > sizeY) || (c.X+pt[0] > sizeX)) && scene[c.X+pt[0]][c.Y+pt[1]] == UNMADE) {
-				n = {c.X+pt[0], c.Y+pt[1]};
-				next.push_back(n);
-			}
-		}
+	uniform_int_distribution<short> distX(0, sizeX/2);
+	uniform_int_distribution<short> distY(0, sizeY);
+	for(int i = 0; i < nenemies; i++) {
+		COORD a;
+		a.X = distX(gen)*2;
+		a.Y = distY(gen);
+		entity b = {a, a};
+		enemies[i] = b;
 	}
 };
 
