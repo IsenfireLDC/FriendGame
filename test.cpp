@@ -77,7 +77,7 @@ void renderCharacter() {
 bool isPath(entity a) {
 	if(a.curr.X <= 0 || a.curr.X >= sizeX || a.curr.Y <= 0 || a.curr.Y >= sizeY) {
 		return false;
-	}
+	};
 	short tile = scene[a.curr.X][a.curr.Y];
 	if(tile == PATH) return true;
 	return false;
