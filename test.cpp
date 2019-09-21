@@ -58,6 +58,11 @@ entity enemies[4];
 
 short scene[sizeX][sizeY];
 
+void debug(char* a) {
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
+	cout << a;
+};
+
 void renderCharacter() {
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
 	cout << " ";
@@ -67,8 +72,7 @@ void renderCharacter() {
 };
 
 bool isPath(entity a) {
-	if(a.curr.X >= sizeX || a.curr.Y >= sizeY) {
-		cout << a.curr.X << " " << a.curr.Y << endl;
+	if(a.curr.X <= 0 || a.curr.X >= sizeX || a.curr.Y <= 0 || a.curr.Y >= sizeY) {
 		return false;
 	}
 	short tile = scene[a.curr.X][a.curr.Y];
@@ -111,9 +115,6 @@ int run()
      if (kbhit())
       {
             KB_code = getch();
-
-            SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
-            cout << KB_code;
 
             switch (KB_code)
             {
