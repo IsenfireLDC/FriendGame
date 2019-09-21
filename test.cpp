@@ -59,11 +59,11 @@ void renderCharacter() {
 	character.prev = character.curr;
 };
 
-bool isPath() {
-	if(character.curr.X <= 0 || character.curr.X >= sizeX || character.curr.Y <= 0 || character.curr.Y >= sizeY) {
+bool isPath(entity ent) {
+	if(ent.curr.X <= 0 || ent.curr.X >= sizeX || ent.curr.Y <= 0 || ent.curr.Y >= sizeY) {
 		return false;
 	};
-	short tile = scene[character.curr.X][character.curr.Y];
+	short tile = scene[ent.curr.X][ent.curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
@@ -75,22 +75,22 @@ void undoCurrentMove() {
 
 void left() {
 	character.curr.X -= 2;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove();
 	renderCharacter();
 };
 void right() {
 	character.curr.X += 2;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove();
 	renderCharacter();
 };
 void up() {
 	character.curr.Y -= 1;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove();
 	renderCharacter();
 };
 void down() {
 	character.curr.Y += 1;
-	if(!isPath()) undoCurrentMove();
+	if(!isPath(character)) undoCurrentMove();
 	renderCharacter();
 };
 
