@@ -35,50 +35,61 @@ using namespace std;
 const int sizeX = 51;
 const int sizeY = 21;
 
-COORD characterPrev = {1, 1};
-COORD character = {1, 1};
+struct entity {
+	COORD curr;
+	COORD prev;
+};
+
+COORD character_origin = {1, 1};
+
+entity character;
 
 short scene[sizeX][sizeY];
 
+void initCharacter() {
+	character.curr = character_origin;
+	character.prev = character_origin;
+};
+
 void renderCharacter() {
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), characterPrev);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.prev);
 	cout << " ";
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character);
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), character.curr);
 	cout << M_CHARACTER;
-	characterPrev = character;
+	character.prev = character.curr;
 };
 
 bool isPath() {
-	if(character.X <= 0 || character.X >= sizeX || character.Y <= 0 || character.Y >= sizeY) {
+	if(character.curr.X <= 0 || character.curr.X >= sizeX || character.curr.Y <= 0 || character.curr.Y >= sizeY) {
 		return false;
 	};
-	short tile = scene[character.X][character.Y];
+	short tile = scene[character.curr.X][character.curr.Y];
 	if(tile == PATH) return true;
 	return false;
 };
 
 void undoCurrentMove() {
-	character.X = characterPrev.X;
-	character.Y = characterPrev.Y;
+	character.curr.X = character.prev.X;
+	character.curr.Y = character.prev.Y;
 };
 
 void left() {
-	character.X -= 2;
+	character.curr.X -= 2;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
 void right() {
-	character.X += 2;
+	character.curr.X += 2;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
 void up() {
-	character.Y -= 1;
+	character.curr.Y -= 1;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
 void down() {
-	character.Y += 1;
+	character.curr.Y += 1;
 	if(!isPath()) undoCurrentMove();
 	renderCharacter();
 };
@@ -87,7 +98,7 @@ int run()
 {
    int KB_code=0;
 
-   while(KB_code != KB_ESCAPE )
+   while(KB_code != KB_ESCAPE)
    {
      if (kbhit())
       {
@@ -136,30 +147,6 @@ void generateOuterWall() {
 				scene[(int)i][(int)j] = PATH;
 };
 
-void generateFloor() {
-	short nextPts[4][2] = {
-			{0, 2},
-			{0, -2},
-			{2, 0},
-			{-2, 0}
-	};
-	default_random_engine gen;
-	uniform_real_distribution<float> dist(0, 1);
-	COORD c = character;
-	COORD n = c;
-	bool done = false;
-	vector<COORD> next;
-	while (!done) {
-		for(int i = 0; i < 4; i++) {
-			short pt[2] = {nextPts[i][0], nextPts[i][1]};
-			if(!((c.Y+pt[1] > sizeY) || (c.X+pt[0] > sizeX)) && scene[c.X+pt[0]][c.Y+pt[1]] == UNMADE) {
-				n = {c.X+pt[0], c.Y+pt[1]};
-				next.push_back(n);
-			}
-		}
-	}
-};
-
 void generate() {
 	generateOuterWall();
 };
@@ -195,6 +182,7 @@ void testRender() {
 void start() {
 	generate();
 	renderScene();
+	initCharacter();
 	//testRender();
 	renderCharacter();
 	run();
