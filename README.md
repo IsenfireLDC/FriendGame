@@ -8,3 +8,8 @@ This game can be run from either the launch.bat file in the base directory, or t
 Say hi to your friend as fast as possible
 Avoid strangers at all cost
 (I'm bad at writing this kind of stuff :P)
+
+
+
+##### Note:
+The Maps folder contains currently unused assets, these were created for the original plan of the game
