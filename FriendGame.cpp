@@ -55,7 +55,7 @@ const int sizeY = 21;
 //timer
 unsigned long starttime = 0;
 //entity setup
-const int total_enemies = 4;
+const int total_strangers = 4;
 
 struct entity {
 	short type;
@@ -65,7 +65,7 @@ struct entity {
 
 entity* companion = new entity;
 
-entity* enemies[total_enemies];
+entity* strangers[total_strangers];
 
 COORD character_origin = {1, 1};
 
@@ -83,6 +83,14 @@ int highscores[scores];
 void start();
 void win();
 void updateScoreboard(int);
+
+//random numbers
+default_random_engine gen;
+struct timespec mytmhere;
+uniform_int_distribution<short> distX(1, sizeX/2-1);
+uniform_int_distribution<short> distY(1, sizeY-2);
+uniform_real_distribution<float> rnd(0, 1);
+uniform_int_distribution<int> getDir(0, 3);
 
 /****** Running Functions ******/
 
@@ -124,7 +132,8 @@ bool canMove(entity* ent) {
 	short tile_ent = entities[ent->curr.X][ent->curr.Y];
 	//special checks
 	if(ent->type == PLAYER && tile_ent == COMPANION) won = true;
-	if((ent->type == PLAYER && tile_ent == STRANGER) || (ent->type == STRANGER && tile_ent == PLAYER)) starttime -= 2000;
+	if(ent->type == PLAYER && tile_ent == STRANGER) starttime -= 2500;
+	else if (ent->type == STRANGER && tile_ent == PLAYER) starttime -= 1000;
 	if(tile == PATH && tile_ent == NONE) return true;
 	return false;
 };
@@ -159,6 +168,31 @@ void down(entity* ent) {
 	if(!canMove(ent)) undoCurrentMove(ent);
 	updateEntity(ent);
 	renderEntity(ent);
+};
+
+void randomMove(entity* ent) {
+	if((bool)round(rnd(gen))) {
+		switch(getDir(gen)) {
+		case 0:
+			left(ent);
+			break;
+		case 1:
+			up(ent);
+			break;
+		case 2:
+			right(ent);
+			break;
+		case 3:
+			down(ent);
+			break;
+		}
+	}
+};
+
+void nonPlayers() {
+	for(int i = 0; i < total_strangers; i++)
+		randomMove(strangers[i]);
+	randomMove(companion);
 };
 
 //main function for the game, takes keyboard input
@@ -208,13 +242,14 @@ void run()
 						break;
 				}
 		  }
+		 nonPlayers();
 	   }
   }
 };
 
 //shows a "you win" message and updates the scoreboard
 void win() {
-	int a = 20000 - (clock() - starttime);
+	int a = 100000 - 2.5*(clock() - starttime);
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {18, 22});
 	cout << "--- YOU WIN! ---";
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {15, 23});
@@ -245,6 +280,11 @@ void win() {
 //get time when the game starts
 void startClock() {
 	starttime = clock();
+};
+
+void initRand() {
+	clock_gettime(CLOCK_REALTIME, &mytmhere);
+	gen.seed(mytmhere.tv_nsec);
 };
 
 //initialize the player
@@ -292,9 +332,10 @@ void updateScoreboard(int score) {
 	renderScoreboard();
 };
 
-void scoreboard() {
+void onFirst() {
 	if(first) {
 		initScoreboard();
+		initRand();
 		first = false;
 	};
 };
@@ -316,16 +357,10 @@ void clearEntities() {
 			entities[(int)i][(int)j] = NONE;
 };
 
-//randomly generates enemies and a companion
+//randomly generates strangers and a companion
 void generateEntities(int nenemies) {
 	clearEntities();
 	initCharacter();
-	default_random_engine gen;
-	struct timespec tm;
-	clock_gettime(CLOCK_REALTIME, &tm);
-	gen.seed(tm.tv_nsec);
-	uniform_int_distribution<short> distX(1, sizeX/2-1);
-	uniform_int_distribution<short> distY(1, sizeY-2);
 	COORD a;
 	for(int i = 0; i < nenemies; i++) {
 		a.X = distX(gen)*2+1;
@@ -339,7 +374,7 @@ void generateEntities(int nenemies) {
 		b->type = STRANGER;
 		b->curr = a;
 		b->prev = a;
-		enemies[i] = b;
+		strangers[i] = b;
 		entities[a.X][a.Y] = STRANGER;
 	};
 	do {
@@ -356,9 +391,9 @@ void generateEntities(int nenemies) {
 void renderEntities() {
 	//player
 	renderEntity(character);
-	//enemies
-	for(int i = 0; i < total_enemies; i++) {
-		renderEntity(enemies[i]);
+	//strangers
+	for(int i = 0; i < total_strangers; i++) {
+		renderEntity(strangers[i]);
 	};
 	//companion
 	renderEntity(companion);
@@ -367,7 +402,7 @@ void renderEntities() {
 //handles all initial generation
 void generate() {
 	generateOuterWall();
-	generateEntities(total_enemies);
+	generateEntities(total_strangers);
 };
 
 //clears the screen
@@ -415,7 +450,7 @@ void start() {
 	won = false;
 	generate();
 	renderScene();
-	scoreboard();
+	onFirst();
 	initCharacter();
 	//testRender();
 	renderEntities();
