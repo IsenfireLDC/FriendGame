@@ -89,7 +89,7 @@ int highscores[scores];
 void start();
 void close();
 void win();
-void updateScoreboard(int);
+int updateScoreboard(int);
 
 //random numbers
 default_random_engine gen;
@@ -275,10 +275,18 @@ void win() {
 		cout << c << flush;
 		Sleep(50);
 	};
+	i = 0;
+	sprintf(ch, "You got rank %i on the scoreboard!", updateScoreboard(a)+1);
+	c = *ch;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {9, 24});
+	while(c != '\0') {
+		c = *(ch + i++);
+		cout << c << flush;
+		Sleep(50);
+	};
 	delete ch;
-	updateScoreboard(a);
 
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {18, 25});
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {18, 26});
 	cout << "Play again? (y/n)";
 	int KB_code = 0;
 	while(true)
@@ -355,8 +363,9 @@ void renderScoreboard() {
 };
 
 //updates the high scores
-void updateScoreboard(int score) {
-	for(int i = 0; i < scores; i++)
+int updateScoreboard(int score) {
+	int i = 0;
+	for(i = 0; i < scores; i++)
 		if(score > highscores[i]) {
 			for(int j = scores-1; j > i; j--)
 				highscores[j] = highscores[j-1];
@@ -364,6 +373,7 @@ void updateScoreboard(int score) {
 			break;
 		}
 	renderScoreboard();
+	return i;
 };
 
 //runs when the program is started for the first time
