@@ -48,6 +48,12 @@ using namespace std;
 #define M_CHARACTER "&"
 #define M_COMPANION "8"
 #define M_STRANGER "~"
+//color
+#define C_DEFAULT FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE
+#define C_WALL C_DEFAULT
+#define C_CHARACTER FOREGROUND_GREEN
+#define C_COMPANION FOREGROUND_BLUE | FOREGROUND_INTENSITY
+#define C_STRANGER FOREGROUND_RED
 
 //board size
 const int sizeX = 51;
@@ -81,6 +87,7 @@ const int scores = 5;
 int highscores[scores];
 //pre-definition of functions
 void start();
+void close();
 void win();
 void updateScoreboard(int);
 
@@ -98,12 +105,16 @@ uniform_int_distribution<int> getDir(0, 3);
 char getModel(short type) {
 	switch(type) {
 	case PLAYER:
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_CHARACTER);
 		return *M_CHARACTER;
 	case STRANGER:
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_STRANGER);
 		return *M_STRANGER;
 	case COMPANION:
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_COMPANION);
 		return *M_COMPANION;
 	default:
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 		return *M_PATH;
 	};
 };
@@ -204,6 +215,7 @@ void run()
    {
 	   //tick clock
 	   if(clock() % 150 == 0) {
+		   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 		   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
 		   cout << clock();
 		   if(won) {
@@ -250,6 +262,7 @@ void run()
 //shows a "you win" message and updates the scoreboard
 void win() {
 	int a = 100000 - 2.5*(clock() - starttime);
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {18, 22});
 	cout << "--- YOU WIN! ---";
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {15, 23});
@@ -262,26 +275,41 @@ void win() {
 		cout << c << flush;
 		Sleep(50);
 	};
+	delete ch;
 	updateScoreboard(a);
 
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {18, 25});
 	cout << "Play again? (y/n)";
 	int KB_code = 0;
-	while(KB_code != KB_N && KB_code != KB_ESCAPE)
+	while(true)
 		if(kbhit()) {
 			KB_code = getch();
-			if(KB_code == KB_Y) start();
-			if(KB_code == KB_N) break;
+			if(KB_code == KB_Y) {
+				start();
+				break;
+			};
+			if(KB_code == KB_N || KB_code == KB_ESCAPE) {
+				close();
+				break;
+			}
 		}
 };
 
 /****** Startup Functions ******/
+
+void setCursor(bool on) {
+	CONSOLE_CURSOR_INFO info;
+	GetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+	info.bVisible = on;
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &info);
+};
 
 //get time when the game starts
 void startClock() {
 	starttime = clock();
 };
 
+//initialized the random number generator
 void initRand() {
 	clock_gettime(CLOCK_REALTIME, &mytmhere);
 	gen.seed(mytmhere.tv_nsec);
@@ -295,7 +323,9 @@ void initCharacter() {
 	entities[character_origin.X][character_origin.Y] = PLAYER;
 };
 
+//initialized the scoreboard
 void initScoreboard() {
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {sizeX+8, 3});
 	cout << "Scoreboard";
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {sizeX+5, 4});
@@ -306,13 +336,16 @@ void initScoreboard() {
 	};
 };
 
+//empties the scoreboard
 void clearScoreboard() {
 	for(short i = 0; i < scores; i++) {
 		SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {sizeX+7, 5+i});
 		cout << "          ";
 	}
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 };
 
+//renders the scoreboard
 void renderScoreboard() {
 	clearScoreboard();
 	for(short i = 0; i < scores; i++) {
@@ -321,6 +354,7 @@ void renderScoreboard() {
 	}
 };
 
+//updates the high scores
 void updateScoreboard(int score) {
 	for(int i = 0; i < scores; i++)
 		if(score > highscores[i]) {
@@ -332,12 +366,23 @@ void updateScoreboard(int score) {
 	renderScoreboard();
 };
 
+//runs when the program is started for the first time
 void onFirst() {
 	if(first) {
+		setCursor(false);
 		initScoreboard();
 		initRand();
 		first = false;
 	};
+};
+
+//runs when the program closes
+void close() {
+	delete companion;
+	for(int i = 0; i < total_strangers; i++)
+		delete strangers[i];
+	delete character;
+	setCursor(true);
 };
 
 //generates the outer barrier
@@ -410,8 +455,9 @@ void clearRender() {
 	for(short i = 0; i < (short)sizeX; i++)
 		for(short j = 0; j < (short)sizeY+5; j++) {
 			SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {i, j});
-			cout << M_PATH;
+			cout << " ";
 		}
+	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 };
 
 //renders walls (to be built on in the future)
