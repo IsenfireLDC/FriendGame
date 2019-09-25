@@ -1,2 +1,2 @@
 @echo off
-cmd /k "call .\Debug\ASCIITest.exe"
+cmd /k "call .\Debug\FriendGame.exe"
