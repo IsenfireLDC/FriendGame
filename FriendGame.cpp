@@ -214,7 +214,8 @@ void run()
    while(KB_code != KB_ESCAPE)
    {
 	   //tick clock
-	   if(clock() % 150 == 0) {
+	   long tick = clock();
+	   if(tick % 25 == 0) {
 		   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), C_DEFAULT);
 		   SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), {0, 22});
 		   cout << clock();
@@ -254,7 +255,9 @@ void run()
 						break;
 				}
 		  }
-		 nonPlayers();
+		 if (tick % 150 == 0) {
+			 nonPlayers();
+		 }
 	   }
   }
 };
